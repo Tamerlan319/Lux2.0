@@ -6,19 +6,19 @@ from vosk import Model, KaldiRecognizer
 import pyaudio
 import queue
 import json
-from words import TRIGGERS, recognize_command, data_set
-from text_to_speech import speak
-from core import CommandRouter, BotAPI
-import typing as t
-from plugins.plugin import router
+from words import TRIGGERS, recognize_command
+from core import MyBotAPI
+import importlib
+from plugins import router
 
-# Пример реализации BotAPI
-class MyBotAPI(BotAPI):
-    async def say(self, text: str) -> None:
-        await speak(text)
+# Динамическая загрузка плагинов
+plugins_dir = 'plugins'
+for filename in os.listdir(plugins_dir):
+    if filename.endswith('.py') and filename != '__init__.py':
+        module_name = filename[:-3]
+        importlib.import_module(f'{plugins_dir}.{module_name}')
 
-    def register(self, router: CommandRouter) -> None:
-        pass
+api = MyBotAPI()
 
 # Настройки устройства и частоты
 device = sd.default.device
@@ -32,9 +32,6 @@ if not os.path.exists(vosk_model_path):
 
 vosk_model = Model(vosk_model_path)
 p = pyaudio.PyAudio()
-
-# Создаем экземпляр MyBotAPI
-api = MyBotAPI()
 
 def is_valid_command(command: str) -> bool:
     """Проверяет, является ли команда значимой (не пустая и не только триггер)."""
@@ -58,6 +55,7 @@ def listen() -> str:
 
 async def main():
     api.register(router)
+    await api.say("Привет! я Люкс! ваш ассистент!")
     while True:
         text = await asyncio.get_event_loop().run_in_executor(None, listen)
 
@@ -82,8 +80,6 @@ async def main():
                     await api.say("Команда не распознана.")
             else:
                 await api.say("Команда не распознана. Попробуйте сказать иначе.")
-
-
 
 # Запуск основной функции
 if __name__ == "__main__":

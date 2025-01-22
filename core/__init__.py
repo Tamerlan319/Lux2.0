@@ -1,4 +1,5 @@
 import typing as t
+from text_to_speech import speak
 
 background_tasks = {}
 
@@ -31,3 +32,10 @@ class CommandRouter:
             if predicate(cmd):
                 return handler
         return None
+
+class MyBotAPI(BotAPI):
+     async def say(self, text: str) -> None:
+         await speak(text)
+
+     def register(self, router: CommandRouter) -> None:
+         pass
