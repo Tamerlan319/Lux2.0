@@ -1,0 +1,8 @@
+sounddevice>=0.4.6
+vosk>=0.3.45
+pyaudio>=0.2.13
+asyncio>=3.4.3
+scikit-learn>=1.0.2
+soundfile>=0.12.1
+simpleaudio>=1.0.4
+torch>=2.0.0
