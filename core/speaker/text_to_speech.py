@@ -1,9 +1,9 @@
 import os
 import torch
 import soundfile as sf
-from tempfile import NamedTemporaryFile
-import simpleaudio as sa
 import asyncio
+import sounddevice as sd
+from tempfile import NamedTemporaryFile
 from core.config import MODEL_PATH, MODEL_URL
 
 # Настройки TTS
@@ -14,25 +14,17 @@ model = torch.package.PackageImporter(MODEL_PATH).load_pickle("tts_models", "mod
 model.to(device_torch)
 
 torch.set_num_threads(4)
-speaker = 'xenia'  # 'aidar', 'baya', 'kseniya', 'xenia', 'random'
-sample_rate = 48000  # 8000, 24000, 48000
+speaker = 'kseniya'
+sample_rate = 48000
 
-async def speak(text):
+def sync_speak(text: str):
     # Генерация аудио
     audio = model.apply_tts(text=text, speaker=speaker, sample_rate=sample_rate)
 
-    # Создание временного файла для хранения аудио
-    with NamedTemporaryFile(delete=False, suffix=".wav") as temp_audio_file:
-        sf.write(temp_audio_file.name, audio, sample_rate)
-        temp_audio_file_path = temp_audio_file.name
+    # Воспроизведение напрямую без записи на диск
+    sd.play(audio, sample_rate)
+    sd.wait()  # Ждём окончания, но это блокировка только для этого потока
 
-    try:
-        # Воспроизведение аудио через simpleaudio
-        wave_obj = sa.WaveObject.from_wave_file(temp_audio_file_path)
-        play_obj = wave_obj.play()
-        await asyncio.sleep(0)  # Позволяет другим задачам выполняться
-        play_obj.wait_done()  # Ждем окончания воспроизведения
-    finally:
-        # Удаление временного файла
-        if os.path.exists(temp_audio_file_path):
-            os.remove(temp_audio_file_path)
+async def speak(text: str):
+    loop = asyncio.get_running_loop()
+    await loop.run_in_executor(None, sync_speak, text)

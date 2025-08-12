@@ -1,6 +1,11 @@
-TRIGGERS = {'люкс', 'lux', 'люксик'}
+triggers = {'люкс', 'Алиса', 'люксик'}
 
 data_set = {
+    'давай поговорим': 'давай поговорим',
+    'разговор': 'давай поговорим',
+    'начнём говорить': 'давай поговорим',
+    'давай начнем говорить': 'давай поговорим',
+    'закончи диалог': 'закончи диалог',
     # Анекдоты
     'расскажи анекдот': 'расскажи анекдот',
     'анекдот расскажи': 'расскажи анекдот',
@@ -79,7 +84,7 @@ def preprocess_command(command: str) -> str:
 def is_valid_command(command: str) -> bool:
     """Проверяет, является ли команда значимой (не пустая и не только триггер)."""
     words = command.split()
-    return any(word not in TRIGGERS for word in words)
+    return any(word not in triggers for word in words)
 
 def recognize_command(command: str) -> t.Optional[str]:
     """Распознает команду с вероятностным порогом."""
@@ -105,11 +110,11 @@ def recognize_command(command: str) -> t.Optional[str]:
 def process_command(input_text: str):
     """Обрабатывает текст команды."""
     # Проверяем наличие триггеров
-    if not any(trigger in input_text.lower() for trigger in TRIGGERS):
+    if not any(trigger in input_text.lower() for trigger in trigger):
         return "Триггер не найден, команда игнорируется."
 
     # Убираем триггер из текста команды
-    for trigger in TRIGGERS:
+    for trigger in trigger:
         input_text = input_text.lower().replace(trigger, "").strip()
 
     # Распознаем команду

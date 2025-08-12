@@ -6,3 +6,4 @@ scikit-learn>=1.0.2
 soundfile>=0.12.1
 simpleaudio>=1.0.4
 torch>=2.0.0
+panda3d
